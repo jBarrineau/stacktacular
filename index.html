@@ -120,6 +120,39 @@
   .panel .play{font-size:24px;padding:14px 28px}
 
   /* respect the iPad's "Reduce Motion" accessibility setting */
+  /* title screen: centred when it fits, scrollable when it doesn't (never cut off) */
+  #title{justify-content:flex-start;overflow-y:auto;touch-action:pan-y;-webkit-overflow-scrolling:touch}
+  #title > :first-child{margin-top:auto}
+  #title > :last-child{margin-bottom:auto}
+  /* hide the round progress bar behind the end-of-game panel */
+  #hud.over #progress{opacity:0}
+  #banner .b3{font-size:clamp(17px,3.6vw,20px)}
+
+  /* phones (portrait) */
+  @media (max-width:600px){
+    #title{padding:16px 16px calc(88px + env(safe-area-inset-bottom))} /* keep clear of Music/Sound */
+    .title{font-size:clamp(30px,9.4vw,60px)}
+    .tag{font-size:17px}
+    .cards{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0 18px;width:100%}
+    .card{max-width:none;font-size:15px;padding:8px 10px;border-radius:14px}
+    .card b{font-size:22px;margin-bottom:2px}
+    .modes{flex-direction:column;align-items:stretch;gap:12px;width:100%;max-width:340px}
+    .play{font-size:24px;padding:12px 20px}
+    .play small{font-size:16px}
+    .tiny{font-size:16px;margin-top:10px}
+    .panel{padding:20px 16px}
+    .panel .modes{flex-direction:row;justify-content:center}
+    .panel .play{font-size:20px;padding:12px 18px}
+  }
+  /* short screens (phones in landscape): drop the instruction cards, put mode buttons side by side */
+  @media (max-height:560px){
+    #title{padding-bottom:16px}
+    .cards{display:none}
+    .tag{margin-bottom:14px}
+    .modes{flex-direction:row;max-width:none;width:auto}
+    .title{font-size:clamp(30px,7vw,60px)}
+  }
+
   @media (prefers-reduced-motion: reduce){
     .title span,.play,.newbest,#combo.fire,#hearts.danger span:not(.lost){animation:none!important}
     #flash.red{animation:none}
@@ -1013,7 +1046,7 @@ function startGame(relaxed = G.relaxed) {
   G.relaxed = relaxed;
   try { localStorage.setItem('stacktacular-mode', relaxed ? 'relaxed' : 'challenge'); } catch (e) { }
   loadBest();
-  $('title').classList.add('hidden'); $('over').classList.add('hidden'); $('hud').classList.remove('hidden');
+  $('title').classList.add('hidden'); $('over').classList.add('hidden'); $('hud').classList.remove('hidden', 'over');
   $('finishBtn').classList.remove('gone'); resetFinishBtn();
   $('hint').style.opacity = 1;
   Object.assign(G, { demo: false, state: 'intro', score: 0, hearts: 3, layers: 0, combo: 0, maxCombo: 0, perfects: 0, noteIdx: 0, canRestart: false, finished: false });
@@ -1027,6 +1060,7 @@ function startGame(relaxed = G.relaxed) {
 
 function gameOver() {
   G.state = 'over';
+  $('hud').classList.add('over');
   $('finishBtn').classList.add('gone');
   $('againBtn').disabled = true;
   const happy = G.relaxed || G.finished;
